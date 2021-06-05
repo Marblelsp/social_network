@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Последние об | Yatube{% endblock %}
+{% load thumbnail %}
+{% block content %}
+<main role="main" class="container">
+    <div class="row">
+        {% include "posts/profile_card.html" %}
+        <div class="col-md-9">                
+            {% include "posts/post_item.html" with post=post %}
+        </div>
+    </div>
+    {% for field in form %}
+        {% include "posts/comments.html"  %}
+    {% endfor %}
+</main>
+{% endblock %}

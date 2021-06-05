@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Последние об | Yatube{% endblock %}
+{% load thumbnail %}
+{% block content %}
+<main role="main" class="container">
+    <div class="row">
+        {% include "posts/profile_card.html" %}
+            <div class="col-md-9">
+                {% for post in page %}
+                    {% include "posts/post_item.html" with post=post %}
+                {% endfor %}
+                {% include "paginator.html" with items=page paginator=paginator%}
+            </div>
+    </div>
+        {% if request.user.is_authenticated and request.user != profile %}
+            <li class="list-group-item">
+                {% if following %}
+                    <a class="btn btn-lg btn-light"
+                        href="{% url 'profile_unfollow' profile.username %}" role="button">
+                        Отписаться
+                    </a>
+                {% else %}
+                <a class="btn btn-lg btn-primary"
+                    href="{% url 'profile_follow' profile.username %}" role="button">
+                        Подписаться
+                </a>
+                {% endif %}
+            </li>
+        {% endif %}
+</main>
+{% endblock %}
