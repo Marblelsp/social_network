@@ -5,6 +5,8 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('group/<slug:slug>/', views.group_posts, name='group'),
+    path('groups/', views.groups, name='groups'),
+    path('new_group/', views.new_group, name='new_group'),
     path('new/', views.new_post, name='new_post'),
     path('500/', views.server_error, name='500'),
     path('404/', views.page_not_found, name='404'),
@@ -15,6 +17,11 @@ urlpatterns = [
         '<str:username>/<int:post_id>/edit/',
         views.post_edit,
         name='post_edit'
+        ),
+    path(
+        '<str:username>/<int:post_id>/delete/',
+        views.post_delete,
+        name='post_delete'
         ),
     path(
         '<username>/<int:post_id>/comment/',

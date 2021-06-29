@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
-
-from .forms import CommentForm, PostForm
-from .models import Follow, Group, Post, User
+from .forms import CommentForm, PostForm, GroupForm
+from .models import Follow, Group, Post
+from users.models import CustomUser
 
 
 def index(request):
@@ -11,9 +11,32 @@ def index(request):
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    context = {'page': page, 'paginator': paginator, 'post_list': post_list}
+    context = {'page': page, 'paginator': paginator, 'post_list': post_list,}
     return render(request, 'posts/index.html', context)
 
+
+@login_required
+def new_group(request):
+    if request.method == 'POST':
+        form = GroupForm(request.POST or None, files=request.FILES or None)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            form.save()
+            return redirect('index')
+        return render(request, 'posts/new_group.html', {'form': form})
+    form = GroupForm()
+    return render(request, 'posts/new_group.html', {'form': form})
+
+
+def groups(request):
+    groups = Group.objects.all()[:11]
+    paginator = Paginator(groups, 10)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    context = {'groups': groups, 'page': page,
+               'paginator': paginator,}
+    return render(request, 'posts/groups.html', context)
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
@@ -23,11 +46,11 @@ def group_posts(request, slug):
     page = paginator.get_page(page_number)
     context = {'group': group, 'page': page,
                'paginator': paginator, 'posts': posts}
-    return render(request, 'group.html', context)
+    return render(request, 'posts/group.html', context)
 
 
 def profile(request, username):
-    author = get_object_or_404(User, username=username)
+    author = get_object_or_404(CustomUser, username=username)
     post_list = author.author_posts.all()
     post_count = post_list.count()
     paginator = Paginator(post_list, 10)
@@ -94,6 +117,7 @@ def post_edit(request, username, post_id):
         return redirect('post', username=username, post_id=post_id)
     form = PostForm(request.POST or None, files=request.FILES or None,
                     instance=post)
+
     if request.method == 'POST' and form.is_valid():
         form.save()
         return redirect('post', username=request.user.username,
@@ -102,6 +126,15 @@ def post_edit(request, username, post_id):
         request, 'posts/post_edit.html', {'form': form, 'post': post,
                                           'is_edit': True}
     )
+
+
+@login_required
+def post_delete(request, username, post_id):
+    post = get_object_or_404(Post, pk=post_id, author__username=username)
+    if request.user != post.author:
+        return redirect('post', username=username, post_id=post_id)
+    post.delete()
+    return redirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required
@@ -131,7 +164,7 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    author = get_object_or_404(User, username=username)
+    author = get_object_or_404(CustomUser, username=username)
     if request.user != author:
         Follow.objects.get_or_create(user=request.user, author=author)
     return redirect('profile', username=username)
@@ -139,7 +172,7 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
-    author = get_object_or_404(User, username=username)
+    author = get_object_or_404(CustomUser, username=username)
     Follow.objects.filter(user=request.user, author=author).delete()
     return redirect('profile', username=username)
 

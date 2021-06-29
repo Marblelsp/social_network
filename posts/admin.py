@@ -16,6 +16,10 @@ class PostAdmin(admin.ModelAdmin):
 
 
 class GroupAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+
+    )
     prepopulated_fields = {"slug": ("title",)}
 
 

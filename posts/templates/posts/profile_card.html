@@ -1,14 +1,29 @@
+
+{% load avatar_tags %}
+
 <div class="col-md-3 mb-3 mt-1">
     <div class="card">
         <div class="card-body">
             <div class="h2">
-                {{ profile.get_full_name }}
+                <div>
+                    {% avatar profile 185 %}
+                    <span class="profile-name">{{ profile.get_full_name }}</span>
+                </div>
             </div>
             <div class="h3 text-muted">
                 <!-- username автора -->
                 {{ profile.username }}
             </div>
+            {% if request.user.is_authenticated and request.user == profile %}
+                <div class="h4 text-muted">
+                    <a href="{% url 'avatar_change' %}">Изменить аватар</a>
+                </div>
+                <div class="h4 text-muted">
+                    <a href="{% url 'avatar_delete' %}">Удалить аватар</a>
+                </div>
+            {% endif %}
         </div>
+
         <ul class="list-group list-group-flush">
                 <li class="list-group-item">
                 <div class="h6 text-muted">

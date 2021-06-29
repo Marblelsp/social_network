@@ -5,7 +5,7 @@
     <form method="post" action="{% url 'add_comment' username=post.author post_id=post.id %}">
         {% csrf_token %}
         <h5 class="card-header">Добавить комментарий:</h5>
-        <div class="card-body">
+        <div class="card-body" >
             <div class="input-group mb-3">
                 {{ form.text|addclass:"form-control" }}
             </div>
